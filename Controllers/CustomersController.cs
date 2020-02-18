@@ -42,6 +42,40 @@ namespace Vidly.Controllers
             return View(customer);
         }
 
+        public ActionResult New()
+        {
+            var membershipTypes = _context.MembershipTypes.ToList();
+            var viewModel = new CustomerFormViewModel
+            {
+                MembershipTypes = membershipTypes
+            };
+            return View("CustomerForm", viewModel);
+        }
+
+        [HttpPost] // This protects the Action from being called using HTTP GET. Actions that modify data should never be accessible by HTTP GET.
+        public ActionResult Create(Customer customer)
+        {
+            _context.Customers.Add(customer); // Adds object to the local list of customers
+            _context.SaveChanges(); // Updates the database with any changes in the local list
+            
+            return RedirectToAction("Index", "Customers");
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var customer = _context.Customers.SingleOrDefault(c => c.Id == id);
+
+            if (customer == null)
+                return HttpNotFound();
+
+            var viewModel = new CustomerFormViewModel
+            {
+                Customer = customer,
+                MembershipTypes = _context.MembershipTypes.ToList()
+            };
+            return View("CustomerForm", viewModel);
+        }
+
         private IEnumerable<Customer> GetCustomers()
         {
             return new List<Customer>
